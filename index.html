@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>InfraDouane</title>
+<meta name="theme-color" content="#0E4A5C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="InfraDouane">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+[hidden]{display:none!important}
+img{max-width:100%}
+:root{
+  --ink:#10232E; --ink-2:#3E5561; --ink-3:#6B808B;
+  --ground:#EEF2F3; --surface:#FFFFFF; --surface-2:#F6F8F9; --line:#D5DEE2;
+  --brand:#0E4A5C; --brand-ink:#FFFFFF; --brand-soft:#DCEBEF;
+  --accent:#C98300; --accent-soft:#FCEFD3;
+  --good:#1F7A4D; --good-soft:#DDF1E6; --warn:#B26A00; --warn-soft:#FBEBD0;
+  --bad:#B3261E; --bad-soft:#F8DEDC; --off:#5B5B66; --off-soft:#E6E6EA;
+  --shadow:0 6px 24px rgba(16,35,46,.12);
+  --display:-apple-system,"SF Pro Display",system-ui,"Segoe UI",Roboto,sans-serif; --body:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --ink:#E4ECEF; --ink-2:#AFC0C7; --ink-3:#7F939C;
+  --ground:#0C171C; --surface:#13232A; --surface-2:#182C34; --line:#27404A;
+  --brand:#5FB3C9; --brand-ink:#06202A; --brand-soft:#173A45;
+  --accent:#F0AE3C; --accent-soft:#3A2C12;
+  --good:#5CC38D; --good-soft:#123326; --warn:#E9A649; --warn-soft:#3A2A12;
+  --bad:#F07B72; --bad-soft:#3B1917; --off:#A5A5B2; --off-soft:#2A2A31;
+  --shadow:0 6px 24px rgba(0,0,0,.45);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ink:#E4ECEF; --ink-2:#AFC0C7; --ink-3:#7F939C;
+  --ground:#0C171C; --surface:#13232A; --surface-2:#182C34; --line:#27404A;
+  --brand:#5FB3C9; --brand-ink:#06202A; --brand-soft:#173A45;
+  --accent:#F0AE3C; --accent-soft:#3A2C12;
+  --good:#5CC38D; --good-soft:#123326; --warn:#E9A649; --warn-soft:#3A2A12;
+  --bad:#F07B72; --bad-soft:#3B1917; --off:#A5A5B2; --off-soft:#2A2A31;
+  --shadow:0 6px 24px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--body);margin:0;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0 24px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+.eyebrow{font:600 11px/1.2 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+
+/* top bar */
+.top{position:sticky;top:0;padding-top:env(safe-area-inset-top,0px);z-index:20;background:var(--brand);color:var(--brand-ink)}
+.top .wrap{display:flex;align-items:center;gap:12px;padding-block:12px}
+.top .back{background:none;border:0;color:inherit;font-size:22px;line-height:1;padding:4px 8px 4px 0}
+.top .ttl{flex:1;min-width:0}
+.top .ttl b{display:block;font:700 17px/1.2 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .ttl small{font-size:12px;opacity:.8}
+.sync{font:500 11px/1 var(--body);padding:6px 9px;border-radius:99px;background:rgba(255,255,255,.14);white-space:nowrap}
+.sync.off{background:var(--accent);color:#1c1300}
+.stripe{height:4px;background:repeating-linear-gradient(-45deg,var(--accent) 0 10px,var(--ink) 10px 20px);opacity:.9}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.nav button{background:none;border:0;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:500;color:var(--ink-3)}
+.nav button svg{width:22px;height:22px}
+.nav button[aria-current="true"]{color:var(--brand)}
+.nav button:disabled{opacity:.35;cursor:default}
+
+section.view{padding-top:18px;display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn.accent{background:var(--accent);color:#1c1300;border-color:var(--accent)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{padding:6px 10px;font-size:13px}
+.btn.block{width:100%;justify-content:center}
+
+/* site cards */
+.sites{display:flex;flex-direction:column;gap:10px}
+.site{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:6px 12px;text-align:left;width:100%}
+.site h3{font-size:17px}
+.site{padding:0;overflow:hidden;display:block}
+.site .open{all:unset;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:14px;width:100%;box-sizing:border-box}
+.site .open:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.site .acts{display:flex;border-top:1px solid var(--line)}
+.site .acts button{flex:1;background:none;border:0;padding:10px;font-size:13.5px;font-weight:600;color:var(--brand)}
+.site .acts button+button{border-left:1px solid var(--line)}
+.site .acts .del{color:var(--bad)}
+.hint{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+.site .meta{font-size:13px;color:var(--ink-2)}
+.pct{font:700 20px/1 var(--display);color:var(--brand);text-align:right;font-variant-numeric:tabular-nums}
+.bar{grid-column:1/-1;height:6px;border-radius:6px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--brand)}
+.tag{display:inline-block;font:600 11px/1 var(--body);padding:4px 7px;border-radius:6px;background:var(--accent-soft);color:var(--warn);letter-spacing:.03em}
+.empty{border:1.5px dashed var(--line);border-radius:14px;padding:18px;color:var(--ink-2);background:var(--surface)}
+
+/* domain grid */
+.domains{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (max-width:420px){.domains{grid-template-columns:1fr}}
+.dom{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;gap:8px;text-align:left}
+.dom .h{display:flex;gap:10px;align-items:center}
+.dom .ic{width:36px;height:36px;border-radius:9px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none}
+.dom .ic svg{width:20px;height:20px}
+.dom b{font:700 14.5px/1.2 var(--display)}
+.dom .s{font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between}
+.dom .bar{height:5px}
+.dom.done .ic{background:var(--good-soft);color:var(--good)}
+
+/* forms */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.fields{display:flex;flex-direction:column;gap:14px}
+.f label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:5px}
+.f .unit{font-weight:400;color:var(--ink-3)}
+.f input,.f select,.f textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px 11px;font-size:15px}
+.f textarea{min-height:84px;resize:vertical}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--line);background:var(--surface-2);border-radius:99px;padding:7px 12px;font-size:13.5px}
+.seg button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.seg.st button[aria-pressed="true"][data-v="Bon"]{background:var(--good);border-color:var(--good);color:#fff}
+.seg.st button[aria-pressed="true"][data-v="Passable"]{background:var(--warn);border-color:var(--warn);color:#fff}
+.seg.st button[aria-pressed="true"][data-v="Mauvais"]{background:var(--bad);border-color:var(--bad);color:#fff}
+.seg.st button[aria-pressed="true"][data-v="Hors service"]{background:var(--off);border-color:var(--off);color:#fff}
+
+/* equipment list */
+.eq{display:flex;flex-direction:column;gap:8px}
+.item{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);text-align:left;width:100%}
+.item b{font-weight:600}
+.item .sub{font-size:12.5px;color:var(--ink-2)}
+.pill{font:600 11.5px/1 var(--body);padding:5px 8px;border-radius:99px;white-space:nowrap;align-self:start}
+.p-Bon{background:var(--good-soft);color:var(--good)}
+.p-Passable{background:var(--warn-soft);color:var(--warn)}
+.p-Mauvais{background:var(--bad-soft);color:var(--bad)}
+.p-Hors{background:var(--off-soft);color:var(--off)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(6,18,24,.5);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:760px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.sheet .grip{width:40px;height:4px;border-radius:4px;background:var(--line);margin:-6px auto 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:10px;z-index:60;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+
+/* report */
+.rep{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 16px;display:flex;flex-direction:column;gap:18px}
+.rep h2{font-size:22px}
+.rep h3{font-size:16px;padding-bottom:6px;border-bottom:2px solid var(--brand);color:var(--brand)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.kpi b{display:block;font:800 22px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--ink-3)}
+.stack{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line)}
+.stack i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink-2)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c);vertical-align:-1px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;font-size:13px}
+.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{background:var(--surface-2);font-weight:600;color:var(--ink-2);white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.kv{display:grid;grid-template-columns:minmax(120px,42%) 1fr;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kv div{padding:7px 10px;border-bottom:1px solid var(--line)}
+.kv div:nth-child(odd){background:var(--surface-2);color:var(--ink-2)}
+.kv div:nth-last-child(-n+2){border-bottom:0}
+.alert{border-left:4px solid var(--bad);background:var(--bad-soft);padding:10px 12px;border-radius:0 10px 10px 0;font-size:13.5px}
+.note{font-size:13px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <button class="back" id="backBtn" aria-label="Retour" hidden>&#8592;</button>
+    <div class="ttl"><b id="topTitle">InfraDouane</b><small id="topSub">UGP-MOD · Collecte de terrain</small></div>
+    <span class="sync" id="sync">Connexion…</span>
+  </div>
+  <div class="stripe"></div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<nav class="nav"><div class="in">
+  <button id="navSites" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/></svg>Bureaux</button>
+  <button id="navSite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Collecte</button>
+  <button id="navReport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Rapport</button>
+</div></nav>
+
+<div id="sheetHost"></div>
+<div id="toastHost"></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------------- Référentiel ---------------- */
+const STATES=["Bon","Passable","Mauvais","Hors service"];
+const STATE_COLOR={"Bon":"var(--good)","Passable":"var(--warn)","Mauvais":"var(--bad)","Hors service":"var(--off)"};
+const PROVINCES=["Kinshasa","Kongo-Central","Kwango","Kwilu","Maï-Ndombe","Kasaï","Kasaï-Central","Kasaï-Oriental","Lomami","Sankuru","Maniema","Sud-Kivu","Nord-Kivu","Ituri","Haut-Uele","Bas-Uele","Tshopo","Mongala","Nord-Ubangi","Sud-Ubangi","Équateur","Tshuapa","Tanganyika","Haut-Lomami","Lualaba","Haut-Katanga"];
+const YN=["Oui","Non"];
+const I={
+ site:'<path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/>',
+ energie:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+ reseau:'<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5M12 12l-6 5M12 12l6 5"/>',
+ parc:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/>',
+ scanners:'<path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M3 12h18"/>',
+ pesage:'<path d="M3 17h18M5 17v-4h14v4M9 13V9h6v4M12 9V5"/>',
+ systemes:'<rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01"/>',
+ securite:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/>',
+ personnel:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"/>',
+ besoins:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>'
+};
+const F=(k,l,t,o,u)=>({k,l,t,o,u});
+const DOMAINS=[
+ {key:"site",label:"Site & bâtiments",fields:[
+  F("type","Type de poste","sel",["Bureau principal","Bureau secondaire","Poste frontalier","Poste aéroportuaire","Port / poste fluvial","Entrepôt sous douane","Autre"]),
+  F("adresse","Adresse / localisation","text"),F("gps","Coordonnées GPS","text",null,"lat, long"),
+  F("propriete","Propriété du bâtiment","seg",["État","Location","Partenaire","Autre"]),
+  F("nb_bat","Nombre de bâtiments","num"),F("superficie","Superficie approximative","num",null,"m²"),
+  F("etat_bat","État général du bâtiment","state"),F("nb_bureaux","Nombre de bureaux / salles","num"),
+  F("local_tech","Salle serveur / local technique","seg",YN),F("clim_tech","Local technique climatisé","seg",YN),
+  F("acces","Accès routier","seg",["Bon","Praticable","Difficile","Saisonnier"]),
+  F("cloture","Clôture et contrôle d'accès","state"),F("effectif","Effectif du personnel","num"),F("horaires","Horaires d'ouverture","text")],
+  equip:["Bâtiment","Guérite","Entrepôt / magasin","Aire de dédouanement","Parking","Clôture / portail","Mobilier","Autre"]},
+ {key:"energie",label:"Énergie électrique",fields:[
+  F("snel","Raccordement SNEL","seg",YN),F("h_snel","Courant SNEL par jour","num",null,"heures"),
+  F("stabilite","Stabilité du réseau électrique","seg",["Stable","Coupures fréquentes","Très instable","Inexistant"]),
+  F("groupe","Groupe électrogène","seg",YN),F("kva","Puissance du groupe","num",null,"kVA"),F("carbu","Consommation carburant","num",null,"L/jour"),
+  F("solaire","Système solaire","seg",YN),F("kwc","Puissance solaire","num",null,"kWc"),
+  F("ups","Onduleurs (UPS) en service","seg",YN),F("autonomie","Autonomie des onduleurs","num",null,"minutes"),
+  F("terre","Mise à la terre / paratonnerre","seg",YN),F("tableau","Tableau électrique","state")],
+  equip:["Groupe électrogène","Onduleur (UPS)","Panneaux solaires","Batteries","Régulateur / convertisseur","Stabilisateur","Tableau électrique","Climatiseur","Autre"]},
+ {key:"reseau",label:"Réseau & télécoms",fields:[
+  F("connexion","Type de connexion Internet","sel",["Fibre optique","VSAT","4G / LTE","Faisceau hertzien","ADSL","Aucune","Autre"]),
+  F("fai","Fournisseur d'accès (FAI)","text"),F("debit_s","Débit souscrit","num",null,"Mbps"),F("debit_m","Débit mesuré","num",null,"Mbps"),
+  F("latence","Latence mesurée","num",null,"ms"),F("secours","Connexion de secours","seg",YN),
+  F("liaison","Liaison au réseau central","seg",["VPN","MPLS","Aucune","Inconnue"]),
+  F("cablage","Câblage LAN","seg",["Cat5e","Cat6","Cat6A","Mixte","Aucun"]),F("prises","Prises réseau actives","num"),
+  F("baie","Baie de brassage","state"),F("wifi","Wi-Fi disponible","seg",YN),F("dispo","Disponibilité réseau estimée","num",null,"%"),
+  F("tel","Téléphonie","seg",["IP","Analogique","Mobile uniquement","Aucune"])],
+  equip:["Routeur","Switch","Pare-feu","Point d'accès Wi-Fi","Modem / terminal VSAT","Baie / armoire réseau","Antenne / radio","Téléphone IP","Autre"]},
+ {key:"parc",label:"Parc informatique",fields:[
+  F("nb_pc","Postes de travail (fixes)","num"),F("nb_port","Ordinateurs portables","num"),F("nb_imp","Imprimantes","num"),
+  F("os","Système d'exploitation dominant","seg",["Windows 11","Windows 10","Windows 7/8","Linux","Mixte"]),
+  F("antivirus","Antivirus / solution de sécurité","text"),F("serveur","Serveur local","seg",YN),
+  F("sauvegarde","Sauvegarde des données","seg",["Automatique","Manuelle","Aucune"]),F("maint","Contrat de maintenance","seg",YN),
+  F("vieux","Postes de plus de 5 ans","num"),F("besoin_pc","Postes supplémentaires nécessaires","num")],
+  equip:["Ordinateur de bureau","Ordinateur portable","Serveur","Imprimante","Photocopieur / multifonction","Scanner de documents","Lecteur code-barres","Vidéoprojecteur","Tablette","Autre"]},
+ {key:"scanners",label:"Scanners & contrôle non intrusif",fields:[
+  F("sc_cont","Scanner conteneurs / véhicules","seg",YN),F("sc_bag","Scanner bagages / colis","seg",YN),
+  F("portique","Portique détecteur","seg",YN),F("radio","Détecteur de radioactivité","seg",YN),
+  F("exploitant","Exploitant","seg",["Douane","Partenaire privé","Mixte"]),F("scans","Scans par jour (moyenne)","num"),
+  F("operateurs","Opérateurs formés","num"),F("liaison_img","Images liées au système douanier","seg",YN),
+  F("maint","Contrat de maintenance","seg",YN),F("der_maint","Dernière maintenance","date"),
+  F("radioprot","Autorisation de radioprotection à jour","seg",["Oui","Non","Non applicable"])],
+  equip:["Scanner conteneurs (fixe)","Scanner mobile","Scanner bagages (rayons X)","Portique","Détecteur de radioactivité","Poste d'analyse d'images","Autre"]},
+ {key:"pesage",label:"Pont bascule & pesage",fields:[
+  F("present","Pont bascule présent","seg",YN),F("nb","Nombre de ponts bascule","num"),F("capacite","Capacité maximale","num",null,"tonnes"),
+  F("longueur","Longueur de la plateforme","num",null,"m"),F("type","Type de pesage","seg",["Électronique","Mécanique","Dynamique (WIM)","Mixte"]),
+  F("etal","Dernier étalonnage","date"),F("organisme","Organisme d'étalonnage","text"),F("pesees","Pesées par jour (moyenne)","num"),
+  F("tickets","Tickets de pesée informatisés","seg",YN),F("liaison","Lié au système douanier","seg",YN),
+  F("exploitant","Exploitant","seg",["Douane","Partenaire","Mixte"])],
+  equip:["Pont bascule","Indicateur / terminal de pesée","Capteurs de charge","Imprimante de tickets","Balance plateforme","Autre"]},
+ {key:"systemes",label:"Systèmes & applications",fields:[
+  F("sydonia","SYDONIA en service","seg",YN),F("version","Version","seg",["SYDONIA World","SYDONIA++","Autre","Aucune"]),
+  F("mode","Connexion au serveur central","seg",["En ligne permanente","Intermittente","Hors ligne"]),
+  F("users","Utilisateurs actifs","num"),F("guichet","Guichet unique connecté","seg",YN),F("paiement","Paiement électronique","seg",YN),
+  F("messagerie","Messagerie professionnelle","seg",YN),F("autres","Autres applications métiers","area"),F("incidents","Incidents fréquents","area")],
+  equip:["Application métier","Licence logicielle","Base de données","Autre"]},
+ {key:"securite",label:"Vidéosurveillance & sécurité",fields:[
+  F("video","Vidéosurveillance","seg",YN),F("cams","Nombre de caméras","num"),F("cams_ok","Caméras fonctionnelles","num"),
+  F("nvr","Enregistreur (NVR/DVR)","seg",YN),F("retention","Conservation des images","num",null,"jours"),
+  F("supervision","Supervision centrale","seg",YN),F("acces","Contrôle d'accès électronique","seg",YN),
+  F("extincteurs","Extincteurs","seg",YN),F("garde","Gardiennage","seg",["Agents internes","Société privée","Police / militaires","Aucun"])],
+  equip:["Caméra IP","Caméra analogique","NVR / DVR","Moniteur","Contrôle d'accès / badgeuse","Extincteur","Alarme","Autre"]},
+ {key:"personnel",label:"Personnel & compétences",fields:[
+  F("it_site","Informaticien sur site","seg",YN),F("nb_tech","Techniciens IT","num"),F("formes","Utilisateurs formés à SYDONIA","num"),
+  F("point_focal","Point focal (nom et téléphone)","text"),F("formation","Besoins de formation","area")],equip:[]},
+ {key:"besoins",label:"Constats & recommandations",fields:[
+  F("priorite","Niveau de priorité global","seg",["Critique","Élevé","Moyen","Faible"]),
+  F("problemes","Problèmes majeurs constatés","area"),F("prioritaires","Besoins prioritaires","area"),
+  F("reco","Recommandations","area"),F("budget","Estimation budgétaire","num",null,"USD")],equip:[]}
+];
+const DOM_BY=Object.fromEntries(DOMAINS.map(d=>[d.key,d]));
+
+/* ---------------- Exemple (non enregistré) ---------------- */
+const DEMO_ID="exemple";
+const DEMO={id:DEMO_ID,demo:true,meta:{nom:"Bureau exemple",code:"EX-01",province:"Haut-Katanga",ville:"Exemple",date:"2026-09-20",agent:"Démonstration"},domains:{
+ site:{fields:{type:"Poste frontalier",etat_bat:"Passable",nb_bat:3,local_tech:"Oui",clim_tech:"Non",acces:"Praticable",effectif:42},items:[{id:"d1",type:"Bâtiment",marque:"",modele:"Bloc administratif",serie:"",qte:1,etat:"Passable",lieu:"Entrée",annee:"2011",obs:"Toiture à refaire"}]},
+ energie:{fields:{snel:"Oui",h_snel:9,stabilite:"Coupures fréquentes",groupe:"Oui",kva:60,ups:"Oui",autonomie:15},items:[{id:"d2",type:"Groupe électrogène",marque:"Perkins",modele:"60 kVA",serie:"PK-60-2231",qte:1,etat:"Mauvais",lieu:"Local technique",annee:"2016",obs:"Fuite d'huile"},{id:"d3",type:"Onduleur (UPS)",marque:"APC",modele:"Smart-UPS 3000",serie:"AS1822",qte:2,etat:"Bon",lieu:"Salle serveur",annee:"2022",obs:""}]},
+ reseau:{fields:{connexion:"VSAT",debit_s:10,debit_m:4,latence:620,liaison:"VPN",cablage:"Cat6"},items:[{id:"d4",type:"Switch",marque:"Cisco",modele:"Catalyst 2960",serie:"FOC1934X",qte:2,etat:"Bon",lieu:"Baie",annee:"2019",obs:""},{id:"d5",type:"Modem / terminal VSAT",marque:"Hughes",modele:"HT2000",serie:"HT-778",qte:1,etat:"Hors service",lieu:"Toit",annee:"2015",obs:"Remplacé par 4G provisoire"}]},
+ parc:{fields:{nb_pc:18,nb_port:4,nb_imp:5,os:"Windows 10",sauvegarde:"Manuelle"},items:[{id:"d6",type:"Ordinateur de bureau",marque:"HP",modele:"ProDesk 400",serie:"",qte:18,etat:"Passable",lieu:"Bureaux",annee:"2018",obs:"6 postes lents"}]},
+ pesage:{fields:{present:"Oui",nb:1,capacite:80,type:"Électronique",etal:"2024-03-10",liaison:"Non"},items:[{id:"d7",type:"Pont bascule",marque:"Mettler",modele:"80 t",serie:"MT-80-551",qte:1,etat:"Passable",lieu:"Aire de contrôle",annee:"2017",obs:"Étalonnage expiré"}]},
+ besoins:{fields:{priorite:"Élevé",problemes:"Liaison VSAT hors service, groupe électrogène défaillant.",reco:"Rétablir la liaison principale et remplacer le groupe."},items:[]}
+}};
+
+/* ---------------- État & stockage ---------------- */
+const LS="ugpmod.releve.v1";
+let S={sites:{},dirty:{}};   // sites[id]={id,meta,domains:{key:{fields,items}},updatedAt}
+let db=null, downloads=true, online=false;
+let view={name:"sites",site:null,dom:null};
+
+function lsLoad(){try{const r=localStorage.getItem(LS);if(r){const o=JSON.parse(r);S.sites=o.sites||{};S.dirty=o.dirty||{};}}catch(e){}}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify({sites:S.sites,dirty:S.dirty}));}catch(e){}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function getSite(id){return id===DEMO_ID?DEMO:S.sites[id]}
+function dom(site,key){site.domains=site.domains||{};if(!site.domains[key])site.domains[key]={fields:{},items:[]};const d=site.domains[key];d.fields=d.fields||{};d.items=d.items||[];return d}
+
+function setSync(){const el=document.getElementById("sync");el.textContent="Sur ce téléphone";el.className="sync"}
+// dirty keys: "s:<id>" meta, "d:<id>:<key>" domain, "x:<id>" deletion
+function mark(k){S.dirty[k]=Date.now();lsSave();setSync();flushSoon()}
+let flushT=null;function flushSoon(){clearTimeout(flushT);flushT=setTimeout(flush,700)}
+async function flush(){
+  if(!db)return;
+  for(const k of Object.keys(S.dirty)){
+    const [t,id,key]=k.split(":");
+    try{
+      if(t==="x"){
+        await db.doc("sites/"+id).delete();
+        for(const d of DOMAINS)await db.doc("domaines/"+id+"__"+d.key).delete();
+      }else if(t==="s"){const s=S.sites[id];if(s)await db.doc("sites/"+id).set({meta:s.meta,createdAt:s.createdAt||Date.now(),updatedAt:s.updatedAt||Date.now()})}
+      else if(t==="d"){const s=S.sites[id];if(s){const d=dom(s,key);await db.doc("domaines/"+id+"__"+key).set({siteId:id,key,fields:d.fields,items:d.items,updatedAt:d.updatedAt||Date.now()})}}
+      delete S.dirty[k];
+    }catch(e){ if(e&&e.code==="invalid_argument"){delete S.dirty[k];toast("Enregistrement refusé : droits d'écriture insuffisants.")} break;}
+  }
+  lsSave();setSync();
+}
+
+async function connect(){try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}}
+let softT=null;function softRender(){clearTimeout(softT);softT=setTimeout(()=>{if(view.name!=="domain")render();else setSync()},250)}
+
+/* ---------------- Calculs ---------------- */
+function isFilled(v){return !(v===undefined||v===null||v==="")}
+function domStats(site,key){const D=DOM_BY[key];const d=(site.domains||{})[key]||{fields:{},items:[]};const f=d.fields||{};
+  const filled=D.fields.filter(x=>isFilled(f[x.k])).length;return{filled,total:D.fields.length,items:(d.items||[]).length,pct:D.fields.length?Math.round(filled/D.fields.length*100):0}}
+function siteStats(site){let filled=0,total=0,items=0,qty=0;const st={};STATES.forEach(s=>st[s]=0);
+  DOMAINS.forEach(D=>{const s=domStats(site,D.key);filled+=s.filled;total+=s.total;const d=(site.domains||{})[D.key];(d&&d.items||[]).forEach(it=>{items++;const q=Number(it.qte)||1;qty+=q;if(st[it.etat]!==undefined)st[it.etat]+=q})});
+  return{filled,total,pct:total?Math.round(filled/total*100):0,items,qty,st}}
+function sitesSorted(){return Object.values(S.sites).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))}
+function fmtDate(d){if(!d)return"—";const x=new Date(d+(String(d).length===10?"T00:00:00":""));return isNaN(x)?esc(d):x.toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"})}
+function fv(field,v){if(!isFilled(v))return"";if(field.t==="date")return fmtDate(v);return esc(v)+(field.u?" "+esc(field.u):"")}
+
+/* ---------------- UI helpers ---------------- */
+const app=document.getElementById("app");
+function toast(msg){const h=document.getElementById("toastHost");h.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>h.innerHTML="",2600)}
+function icon(k){return`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`}
+function pillClass(e){return e==="Hors service"?"p-Hors":"p-"+e}
+function go(name,site,d){view={name,site:site??view.site,dom:d??null};render();window.scrollTo(0,0)}
+
+function setTop(title,sub,back){document.getElementById("topTitle").textContent=title;document.getElementById("topSub").textContent=sub;document.getElementById("backBtn").hidden=!back}
+function setNav(){const cur={sites:"navSites",site:"navSite",domain:"navSite",report:"navReport"}[view.name];
+  ["navSites","navSite","navReport"].forEach(id=>document.getElementById(id).setAttribute("aria-current",id===cur?"true":"false"));
+  document.getElementById("navSite").disabled=!view.site||!getSite(view.site)}
+
+function render(){
+  setSync();
+  if(view.site&&!getSite(view.site))view={name:"sites",site:null,dom:null};
+  if(view.name==="sites")renderSites();else if(view.name==="site")renderSite();else if(view.name==="domain")renderDomain();else renderReport();
+  setNav();
+}
+
+/* ---------------- Vue : liste des bureaux ---------------- */
+function siteCard(s){const st=siteStats(s);const m=s.meta||{};
+  return`<div class="site"><button class="open" data-open="${esc(s.id)}">
+   <div><h3>${esc(m.nom||"Sans nom")} ${s.demo?'<span class="tag">EXEMPLE</span>':""}</h3>
+   <div class="meta">${esc(m.province||"")}${m.ville?" · "+esc(m.ville):""}${m.code?' · <span class="mono">'+esc(m.code)+"</span>":""}</div>
+   <div class="meta muted">Visite ${fmtDate(m.date)} · ${st.items} équipement${st.items>1?"s":""} relevé${st.items>1?"s":""}</div></div>
+   <div class="pct">${st.pct}%</div><div class="bar"><i style="width:${st.pct}%"></i></div></button>
+   ${s.demo?"":`<div class="acts"><button data-edit="${esc(s.id)}">Modifier</button><button class="del" data-del="${esc(s.id)}">Supprimer</button></div>`}</div>`}
+function renderSites(){
+  setTop("InfraDouane","UGP-MOD · Inventaire technique",false);
+  const list=sitesSorted();
+  app.innerHTML=`<section class="view">
+   <div class="row spread"><div><div class="eyebrow">Bureaux et postes visités</div><h2 style="font-size:24px">${list.length} bureau${list.length>1?"x":""} enregistré${list.length>1?"s":""}</h2></div>
+   <button class="btn accent" id="newSite">+ Nouveau bureau</button></div>
+   <div class="sites">${list.map(siteCard).join("")||`<div class="empty">Aucun bureau enregistré pour l'instant. Créez la fiche du premier bureau visité ; la fiche d'exemple ci-dessous montre à quoi ressemble une collecte remplie.</div>`}
+   ${list.length?"":siteCard(DEMO)}</div>
+   <div class="note">Les données sont enregistrées automatiquement sur ce téléphone, même sans réseau. Exportez régulièrement une sauvegarde (.json) : elle permet aussi de regrouper les collectes de plusieurs agents sur un seul appareil (bouton Importer).</div>
+   <div class="card"><div class="eyebrow" style="margin-bottom:8px">Sauvegarde</div>
+    <div class="row"><button class="btn small" id="expJson">Exporter une sauvegarde (.json)</button><label class="btn small" for="impJson">Importer une sauvegarde</label><input type="file" id="impJson" accept=".json,application/json" hidden></div></div>
+  </section>`;
+  app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>go("site",b.dataset.open));
+  app.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>siteSheet(b.dataset.edit));
+  app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>askDeleteSite(b.dataset.del));
+  document.getElementById("newSite").onclick=()=>siteSheet();
+  document.getElementById("expJson").onclick=()=>save(`releve-douane-sauvegarde-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({version:1,exportedAt:new Date().toISOString(),sites:S.sites},null,1));
+  document.getElementById("impJson").onchange=importJson;
+}
+function importJson(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);let n=0;
+  Object.values(o.sites||{}).forEach(s=>{if(!s||!s.id)return;const cur=S.sites[s.id];if(cur&&(cur.updatedAt||0)>(s.updatedAt||0))return;S.sites[s.id]=s;S.dirty["s:"+s.id]=Date.now();DOMAINS.forEach(D=>{if(s.domains&&s.domains[D.key])S.dirty["d:"+s.id+":"+D.key]=Date.now()});n++});
+  lsSave();flushSoon();render();toast(n+" bureau(x) importé(s)")}catch(err){toast("Fichier illisible : choisissez une sauvegarde .json exportée depuis cette application.")}};r.readAsText(f)}
+
+/* ---------------- Fiche bureau (création / édition) ---------------- */
+function siteSheet(id){
+  const s=id?S.sites[id]:null;const m=s?s.meta:{date:new Date().toISOString().slice(0,10)};
+  openSheet(`<div class="grip"></div><h2 style="font-size:20px">${s?"Modifier le bureau":"Nouveau bureau de douane"}</h2>
+   <form id="siteForm" class="fields">
+    <div class="f"><label for="s_nom">Nom du bureau / poste *</label><input id="s_nom" required value="${esc(m.nom)}" placeholder="ex. Bureau de Matadi"></div>
+    <div class="grid2"><div class="f"><label for="s_code">Code bureau</label><input id="s_code" class="mono" value="${esc(m.code)}"></div>
+    <div class="f"><label for="s_prov">Province</label><select id="s_prov"><option value="">—</option>${PROVINCES.map(p=>`<option ${p===m.province?"selected":""}>${p}</option>`).join("")}</select></div></div>
+    <div class="grid2"><div class="f"><label for="s_ville">Ville / localité</label><input id="s_ville" value="${esc(m.ville)}"></div>
+    <div class="f"><label for="s_date">Date de visite</label><input id="s_date" type="date" value="${esc(m.date)}"></div></div>
+    <div class="grid2"><div class="f"><label for="s_agent">Agent(s) enquêteur(s)</label><input id="s_agent" value="${esc(m.agent)}"></div>
+    <div class="f"><label for="s_resp">Chef de bureau rencontré</label><input id="s_resp" value="${esc(m.resp)}"></div></div>
+    <div class="row"><button class="btn primary" type="submit">${s?"Enregistrer":"Créer et commencer la collecte"}</button><button class="btn" type="button" data-close>Annuler</button>
+    ${s?`<button class="btn danger" type="button" id="delSite" style="margin-left:auto">Supprimer</button>`:""}</div>
+   </form>`);
+  document.getElementById("siteForm").onsubmit=ev=>{ev.preventDefault();
+    const meta={nom:v("s_nom").trim(),code:v("s_code").trim(),province:v("s_prov"),ville:v("s_ville").trim(),date:v("s_date"),agent:v("s_agent").trim(),resp:v("s_resp").trim()};
+    if(!meta.nom){toast("Indiquez le nom du bureau.");return}
+    const nid=s?s.id:uid();const site=s||{id:nid,domains:{},createdAt:Date.now()};site.meta=meta;site.updatedAt=Date.now();S.sites[nid]=site;
+    mark("s:"+nid);closeSheet();toast(s?"Bureau mis à jour":"Bureau créé");go("site",nid)};
+  const del=document.getElementById("delSite");
+  if(del)del.onclick=()=>askDeleteSite(id);
+}
+function askDeleteSite(id){const s=S.sites[id];if(!s)return;const st=siteStats(s);
+  confirmSheet(`Supprimer le bureau « ${esc(s.meta&&s.meta.nom)} » ?`,`Toute sa collecte sera effacée : ${st.filled} rubriques remplies et ${st.items} ligne(s) d'équipement. Cette action est définitive.`,"Supprimer le bureau",()=>{
+    delete S.sites[id];Object.keys(S.dirty).forEach(k=>{if(k.includes(":"+id))delete S.dirty[k]});mark("x:"+id);toast("Bureau supprimé");go("sites",null)})}
+function confirmSheet(title,msg,label,onYes){
+  openSheet(`<div class="grip"></div><h2 style="font-size:19px">${title}</h2><p style="margin:0;color:var(--ink-2)">${msg}</p>
+   <div class="row"><button class="btn danger" id="cfYes" style="background:var(--bad);color:#fff">${esc(label)}</button><button class="btn" data-close>Annuler</button></div>`);
+  document.getElementById("cfYes").onclick=()=>{closeSheet();onYes()}}
+function v(id){return document.getElementById(id).value}
+
+/* ---------------- Vue : bureau (domaines) ---------------- */
+function renderSite(){
+  const s=getSite(view.site);const m=s.meta||{};const st=siteStats(s);
+  setTop(m.nom||"Bureau",[m.province,m.code].filter(Boolean).join(" · ")||"Collecte",true);
+  app.innerHTML=`<section class="view">
+   ${s.demo?`<div class="note"><span class="tag">EXEMPLE</span> Fiche de démonstration, non enregistrée. Créez un bureau pour saisir vos propres données.</div>`:""}
+   <div class="card row spread"><div><div class="eyebrow">Avancement de la collecte</div><div style="font:800 28px/1.1 var(--display)">${st.pct}%</div>
+    <div class="muted" style="font-size:13px">${st.filled}/${st.total} rubriques · ${st.items} lignes d'équipement (${st.qty} unités)</div></div>
+    <div class="row">${s.demo?"":`<button class="btn small" id="editSite">Modifier le bureau</button><button class="btn small danger" id="delSiteV">Supprimer</button>`}<button class="btn small primary" id="toReport">Voir le rapport</button></div></div>
+   <div class="eyebrow">Domaines de collecte</div>
+   <div class="domains">${DOMAINS.map(D=>{const x=domStats(s,D.key);return`<button class="dom ${x.pct===100?"done":""}" data-dom="${D.key}">
+     <div class="h"><span class="ic">${icon(D.key)}</span><b>${D.label}</b></div>
+     <div class="bar"><i style="width:${x.pct}%"></i></div>
+     <div class="s"><span>${x.filled?x.filled+"/"+x.total+" · modifier":x.filled+"/"+x.total+" rubriques"}</span><span>${D.equip.length?x.items+" équip.":""}</span></div></button>`}).join("")}</div>
+  </section>`;
+  app.querySelectorAll("[data-dom]").forEach(b=>b.onclick=()=>go("domain",view.site,b.dataset.dom));
+  const e=document.getElementById("editSite");if(e)e.onclick=()=>siteSheet(s.id);
+  const dv=document.getElementById("delSiteV");if(dv)dv.onclick=()=>askDeleteSite(s.id);
+  document.getElementById("toReport").onclick=()=>go("report",view.site);
+}
+
+/* ---------------- Vue : domaine ---------------- */
+function fieldHTML(fd,val){
+  const id="f_"+fd.k;const lab=`<label for="${id}">${esc(fd.l)}${fd.u?` <span class="unit">(${esc(fd.u)})</span>`:""}</label>`;
+  if(fd.t==="seg"||fd.t==="state"){const opts=fd.t==="state"?STATES:fd.o;
+    return`<div class="f"><label id="${id}_l">${esc(fd.l)}</label><div class="seg ${fd.t==="state"?"st":""}" role="group" aria-labelledby="${id}_l" data-k="${fd.k}">${opts.map(o=>`<button type="button" data-v="${esc(o)}" aria-pressed="${o===val}">${esc(o)}</button>`).join("")}</div></div>`}
+  if(fd.t==="sel")return`<div class="f">${lab}<select id="${id}" data-k="${fd.k}"><option value="">—</option>${fd.o.map(o=>`<option ${o===val?"selected":""}>${esc(o)}</option>`).join("")}</select></div>`;
+  if(fd.t==="area")return`<div class="f">${lab}<textarea id="${id}" data-k="${fd.k}">${esc(val)}</textarea></div>`;
+  const type=fd.t==="num"?"number":fd.t==="date"?"date":"text";
+  return`<div class="f">${lab}<input id="${id}" data-k="${fd.k}" type="${type}" ${type==="number"?'inputmode="decimal" step="any"':""} value="${esc(val)}" ${fd.u&&type==="text"?`placeholder="${esc(fd.u)}"`:""}></div>`}
+function itemHTML(it){return`<button class="item" data-item="${esc(it.id)}"><div><b>${esc(it.type)}${Number(it.qte)>1?` × ${esc(it.qte)}`:""}</b>
+  <div class="sub">${esc([it.marque,it.modele].filter(Boolean).join(" "))||"—"}${it.serie?` · <span class="mono">${esc(it.serie)}</span>`:""}${it.lieu?" · "+esc(it.lieu):""}</div>
+  ${it.obs?`<div class="sub muted">${esc(it.obs)}</div>`:""}</div>${it.etat?`<span class="pill ${pillClass(it.etat)}">${esc(it.etat)}</span>`:""}</button>`}
+let saveT=null;
+function renderDomain(){
+  const s=getSite(view.site);const D=DOM_BY[view.dom];const d=dom(s,D.key);
+  setTop(D.label,(s.meta&&s.meta.nom)||"",true);
+  app.innerHTML=`<section class="view">
+   <div class="card"><div class="eyebrow" style="margin-bottom:12px">Questionnaire</div><div class="fields" id="fields">${D.fields.map(fd=>fieldHTML(fd,d.fields[fd.k])).join("")}</div></div>
+   ${D.equip.length?`<div class="card"><div class="row spread" style="margin-bottom:12px"><div class="eyebrow">Inventaire des équipements · ${d.items.length}</div><button class="btn small primary" id="addItem">+ Ajouter</button></div>
+    ${d.items.length?`<div class="hint" style="margin:-6px 0 10px">Touchez un équipement pour le modifier ou le supprimer.</div>`:""}
+    <div class="eq">${d.items.map(itemHTML).join("")||`<div class="muted" style="font-size:14px">Aucun équipement relevé. Ajoutez chaque appareil avec sa marque, son numéro de série et son état.</div>`}</div></div>`:""}
+      <div class="note">Vous pouvez revenir modifier cette collecte à tout moment : chaque changement est enregistré automatiquement.${d.updatedAt?` Dernière modification : ${new Date(d.updatedAt).toLocaleString("fr-FR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}.`:""}</div>
+   <div class="row"><button class="btn primary" id="doneDom" style="flex:1;justify-content:center">Terminé · retour au bureau</button>
+   ${s.demo?"":`<button class="btn danger" id="clearDom">Supprimer cette collecte</button>`}</div>
+  </section>`;
+  const commit=()=>{if(s.demo){toast("Exemple : créez un bureau pour enregistrer vos saisies.");return}d.updatedAt=Date.now();s.updatedAt=Date.now();clearTimeout(saveT);saveT=setTimeout(()=>{mark("d:"+s.id+":"+D.key);mark("s:"+s.id)},500)};
+  app.querySelectorAll("#fields [data-k]").forEach(el=>{
+    if(el.classList.contains("seg")){el.querySelectorAll("button").forEach(b=>b.onclick=()=>{const k=el.dataset.k;const nv=d.fields[k]===b.dataset.v?"":b.dataset.v;
+      if(s.demo){toast("Exemple : créez un bureau pour enregistrer vos saisies.");return}
+      d.fields[k]=nv;el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===nv));commit()})}
+    else el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{if(s.demo){el.value=d.fields[el.dataset.k]??"";toast("Exemple : créez un bureau pour enregistrer vos saisies.");return}
+      d.fields[el.dataset.k]=el.type==="number"?(el.value===""?"":Number(el.value)):el.value;commit()})});
+  const add=document.getElementById("addItem");if(add)add.onclick=()=>itemSheet(s,D,null);
+  app.querySelectorAll("[data-item]").forEach(b=>b.onclick=()=>itemSheet(s,D,d.items.find(i=>i.id===b.dataset.item)));
+  document.getElementById("doneDom").onclick=()=>go("site",view.site);
+  const cd=document.getElementById("clearDom");if(cd)cd.onclick=()=>confirmSheet(`Supprimer la collecte « ${esc(D.label)} » ?`,`Les réponses du questionnaire et les ${d.items.length} équipement(s) de ce domaine seront effacés pour ce bureau. Les autres domaines ne sont pas touchés.`,"Supprimer la collecte",()=>{
+    d.fields={};d.items=[];d.updatedAt=Date.now();s.updatedAt=Date.now();mark("d:"+s.id+":"+D.key);mark("s:"+s.id);toast("Collecte supprimée");go("site",s.id)});
+}
+function itemSheet(s,D,it){
+  if(s.demo){toast("Exemple : créez un bureau pour enregistrer vos saisies.");return}
+  const x=it||{type:D.equip[0],qte:1,etat:""};const d=dom(s,D.key);
+  openSheet(`<div class="grip"></div><h2 style="font-size:20px">${it?"Modifier l'équipement":"Nouvel équipement"}</h2><div class="muted" style="margin-top:-8px;font-size:13px">${esc(D.label)}</div>
+   <form id="itemForm" class="fields">
+    <div class="f"><label for="i_type">Type d'équipement</label><select id="i_type">${D.equip.map(t=>`<option ${t===x.type?"selected":""}>${esc(t)}</option>`).join("")}</select></div>
+    <div class="grid2"><div class="f"><label for="i_marque">Marque</label><input id="i_marque" value="${esc(x.marque)}"></div><div class="f"><label for="i_modele">Modèle</label><input id="i_modele" value="${esc(x.modele)}"></div></div>
+    <div class="grid2"><div class="f"><label for="i_serie">N° de série / inventaire</label><input id="i_serie" class="mono" value="${esc(x.serie)}"></div><div class="f"><label for="i_qte">Quantité</label><input id="i_qte" type="number" min="1" inputmode="numeric" value="${esc(x.qte)}"></div></div>
+    <div class="f"><label id="i_etat_l">État</label><div class="seg st" id="i_etat" role="group" aria-labelledby="i_etat_l">${STATES.map(o=>`<button type="button" data-v="${o}" aria-pressed="${o===x.etat}">${o}</button>`).join("")}</div></div>
+    <div class="grid2"><div class="f"><label for="i_lieu">Emplacement</label><input id="i_lieu" value="${esc(x.lieu)}" placeholder="ex. Salle serveur"></div><div class="f"><label for="i_annee">Année d'acquisition</label><input id="i_annee" inputmode="numeric" value="${esc(x.annee)}"></div></div>
+    <div class="f"><label for="i_obs">Observations</label><textarea id="i_obs">${esc(x.obs)}</textarea></div>
+    <div class="row"><button class="btn primary" type="submit">Enregistrer</button><button class="btn" type="button" data-close>Annuler</button>${it?`<button class="btn danger" type="button" id="delItem" style="margin-left:auto">Supprimer</button>`:""}</div>
+   </form>`);
+  let etat=x.etat||"";const seg=document.getElementById("i_etat");
+  seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{etat=etat===b.dataset.v?"":b.dataset.v;seg.querySelectorAll("button").forEach(y=>y.setAttribute("aria-pressed",y.dataset.v===etat))});
+  const done=()=>{d.updatedAt=Date.now();s.updatedAt=Date.now();mark("d:"+s.id+":"+D.key);mark("s:"+s.id);closeSheet();render()};
+  document.getElementById("itemForm").onsubmit=ev=>{ev.preventDefault();
+    const n={id:it?it.id:uid(),type:v("i_type"),marque:v("i_marque").trim(),modele:v("i_modele").trim(),serie:v("i_serie").trim(),qte:Math.max(1,Number(v("i_qte"))||1),etat,lieu:v("i_lieu").trim(),annee:v("i_annee").trim(),obs:v("i_obs").trim()};
+    if(it)d.items[d.items.indexOf(it)]=n;else d.items.push(n);done();toast(it?"Équipement mis à jour":"Équipement ajouté")};
+  const del=document.getElementById("delItem");
+  if(del)del.onclick=()=>confirmSheet(`Supprimer « ${esc(it.type)} » ?`,`${esc([it.marque,it.modele,it.serie].filter(Boolean).join(" · ")||"Cet équipement")} sera retiré de l'inventaire.`,"Supprimer l'équipement",()=>{d.items=d.items.filter(i=>i!==it);done();toast("Équipement supprimé")});
+}
+
+/* ---------------- Sheet ---------------- */
+function openSheet(html){const h=document.getElementById("sheetHost");h.innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  document.getElementById("scrim").onclick=e=>{if(e.target.id==="scrim"||e.target.hasAttribute("data-close"))closeSheet()};
+  const first=h.querySelector("input,select,textarea");if(first)first.focus({preventScroll:true})}
+function closeSheet(){document.getElementById("sheetHost").innerHTML=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
+
+/* ---------------- Rapport ---------------- */
+function kv(D,f){const rows=D.fields.filter(x=>isFilled(f[x.k]));if(!rows.length)return`<p class="muted" style="margin:0;font-size:13px">Aucune donnée saisie.</p>`;
+  return`<div class="kv">${rows.map(x=>`<div>${esc(x.l)}</div><div>${fv(x,f[x.k])}</div>`).join("")}</div>`}
+function eqTable(items){if(!items.length)return"";return`<div class="tbl"><table><thead><tr><th>Type</th><th>Marque / modèle</th><th>N° série</th><th>Qté</th><th>État</th><th>Emplacement</th><th>Observations</th></tr></thead><tbody>
+  ${items.map(i=>`<tr><td>${esc(i.type)}</td><td>${esc([i.marque,i.modele].filter(Boolean).join(" "))}</td><td class="mono">${esc(i.serie)}</td><td class="mono">${esc(i.qte)}</td><td>${i.etat?`<span class="pill ${pillClass(i.etat)}">${esc(i.etat)}</span>`:""}</td><td>${esc(i.lieu)}</td><td>${esc(i.obs)}</td></tr>`).join("")}</tbody></table></div>`}
+function g(s,k,f){const d=(s.domains||{})[k];return d&&d.fields?d.fields[f]:undefined}
+function siteReport(s){
+  const m=s.meta||{};const st=siteStats(s);const tot=STATES.reduce((a,x)=>a+st.st[x],0)||1;
+  const crit=[];DOMAINS.forEach(D=>{const d=(s.domains||{})[D.key];(d&&d.items||[]).forEach(i=>{if(i.etat==="Hors service"||i.etat==="Mauvais")crit.push({...i,dom:D.label})})});
+  const ind=[["Connexion Internet",g(s,"reseau","connexion")],["Débit mesuré",isFilled(g(s,"reseau","debit_m"))?g(s,"reseau","debit_m")+" Mbps":""],["Courant SNEL",isFilled(g(s,"energie","h_snel"))?g(s,"energie","h_snel")+" h/jour":g(s,"energie","snel")],["Groupe électrogène",g(s,"energie","groupe")],["SYDONIA",g(s,"systemes","sydonia")],["Pont bascule",g(s,"pesage","present")],["Scanner conteneurs",g(s,"scanners","sc_cont")],["Priorité globale",g(s,"besoins","priorite")]];
+  return`<div class="rep" id="repBody">
+   <div><div class="eyebrow">Rapport d'état des lieux · UGP-MOD</div><h2>${esc(m.nom||"Bureau")}</h2>
+   <div class="muted" style="font-size:13.5px">${[m.province,m.ville].filter(Boolean).map(esc).join(" · ")}${m.code?` · Code <span class="mono">${esc(m.code)}</span>`:""}<br>Visite du ${fmtDate(m.date)}${m.agent?" · Enquêteur : "+esc(m.agent):""}${m.resp?" · Chef de bureau : "+esc(m.resp):""}<br>Rapport généré le ${new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"})}</div></div>
+   <div class="kpis"><div class="kpi"><b>${st.pct}%</b><span>Collecte complétée</span></div><div class="kpi"><b>${st.qty}</b><span>Unités d'équipement</span></div>
+    <div class="kpi"><b style="color:var(--bad)">${st.st["Hors service"]+st.st["Mauvais"]}</b><span>Mauvais ou hors service</span></div><div class="kpi"><b>${esc(g(s,"besoins","priorite")||"—")}</b><span>Priorité</span></div></div>
+   <div><h3>Synthèse</h3>
+    <div style="margin-top:10px" class="stack" role="img" aria-label="Répartition des équipements par état">${STATES.map(x=>st.st[x]?`<i style="width:${st.st[x]/tot*100}%;background:${STATE_COLOR[x]}" title="${x} : ${st.st[x]}"></i>`:"").join("")}</div>
+    <div class="legend" style="margin-top:8px">${STATES.map(x=>`<span style="--c:${STATE_COLOR[x]}">${x} <b class="mono">${st.st[x]}</b></span>`).join("")}</div>
+    <div class="kv" style="margin-top:12px">${ind.map(([l,x])=>`<div>${l}</div><div>${isFilled(x)?esc(x):'<span class="muted">non renseigné</span>'}</div>`).join("")}</div></div>
+   ${crit.length?`<div><h3>Points critiques</h3><div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">${crit.map(i=>`<div class="alert"><b>${esc(i.type)}</b> ${esc([i.marque,i.modele].filter(Boolean).join(" "))} — ${esc(i.etat)} <span class="muted">(${esc(i.dom)})</span>${i.obs?"<br>"+esc(i.obs):""}</div>`).join("")}</div></div>`:""}
+   ${DOMAINS.map(D=>{const d=(s.domains||{})[D.key]||{fields:{},items:[]};const x=domStats(s,D.key);
+     return`<div style="display:flex;flex-direction:column;gap:10px"><h3>${D.label} <span class="muted" style="font:500 12px var(--body)">· ${x.filled}/${x.total} rubriques</span></h3>${kv(D,d.fields||{})}${eqTable(d.items||[])}</div>`}).join("")}
+  </div>`}
+function globalTable(){const list=sitesSorted();if(!list.length)return"";
+  return`<div class="card"><div class="eyebrow" style="margin-bottom:10px">Synthèse de tous les bureaux</div><div class="tbl"><table><thead><tr><th>Bureau</th><th>Province</th><th>Collecte</th><th>Unités</th><th>Mauv./HS</th><th>Connexion</th><th>Priorité</th></tr></thead><tbody>
+   ${list.map(s=>{const st=siteStats(s);return`<tr><td><a href="#" data-rep="${esc(s.id)}" style="color:var(--brand)">${esc(s.meta&&s.meta.nom)}</a></td><td>${esc(s.meta&&s.meta.province)}</td><td class="mono">${st.pct}%</td><td class="mono">${st.qty}</td><td class="mono">${st.st["Mauvais"]+st.st["Hors service"]}</td><td>${esc(g(s,"reseau","connexion")||"—")}</td><td>${esc(g(s,"besoins","priorite")||"—")}</td></tr>`}).join("")}</tbody></table></div></div>`}
+function renderReport(){
+  const s=view.site&&getSite(view.site);
+  setTop("Rapport",s?(s.meta&&s.meta.nom)||"":"Tous les bureaux",!!s);
+  const dlNote=downloads?"":`<div class="note">L'export de fichiers n'est pas disponible dans cette vue. Le rapport reste consultable ci-dessous.</div>`;
+  app.innerHTML=`<section class="view">
+   ${s?`<div class="card"><div class="eyebrow" style="margin-bottom:10px">Exporter</div><div class="row">
+     <button class="btn small primary" id="dlHtml" ${downloads?"":"disabled"}>Rapport du bureau (.html)</button>
+     <button class="btn small" id="dlCsv" ${downloads?"":"disabled"}>Inventaire (.csv / Excel)</button></div>
+     <div class="muted" style="font-size:12.5px;margin-top:8px">Le fichier .html s'ouvre dans n'importe quel navigateur ou dans Word, et s'imprime en PDF.</div></div>${dlNote}${siteReport(s)}`
+    :`<div class="empty">Choisissez un bureau pour afficher son rapport détaillé.</div>`}
+   ${globalTable()}
+   ${Object.keys(S.sites).length?`<div class="card"><div class="eyebrow" style="margin-bottom:10px">Export consolidé</div><div class="row"><button class="btn small" id="dlAllCsv" ${downloads?"":"disabled"}>Inventaire de tous les bureaux (.csv)</button><button class="btn small" id="dlAllHtml" ${downloads?"":"disabled"}>Rapport consolidé (.html)</button></div></div>`:""}
+  </section>`;
+  app.querySelectorAll("[data-rep]").forEach(a=>a.onclick=e=>{e.preventDefault();go("report",a.dataset.rep)});
+  const slug=t=>String(t||"bureau").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"").toLowerCase();
+  const b1=document.getElementById("dlHtml");if(b1)b1.onclick=()=>save(`rapport-${slug(s.meta.nom)}-${new Date().toISOString().slice(0,10)}.html`,standalone(siteReport(s),"Rapport — "+(s.meta.nom||"")));
+  const b2=document.getElementById("dlCsv");if(b2)b2.onclick=()=>save(`inventaire-${slug(s.meta.nom)}.csv`,csv([s]));
+  const b3=document.getElementById("dlAllCsv");if(b3)b3.onclick=()=>save(`inventaire-tous-bureaux-${new Date().toISOString().slice(0,10)}.csv`,csv(sitesSorted()));
+  const b4=document.getElementById("dlAllHtml");if(b4)b4.onclick=()=>save(`rapport-consolide-${new Date().toISOString().slice(0,10)}.html`,standalone(globalTable()+sitesSorted().map(siteReport).join('<div style="page-break-after:always"></div>'),"Rapport consolidé UGP-MOD"));
+}
+function csv(list){const q=x=>{const t=String(x??"");return/[;"\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
+  const rows=[["Bureau","Code","Province","Ville","Date visite","Domaine","Type","Marque","Modèle","N° série","Quantité","État","Emplacement","Année","Observations"]];
+  list.forEach(s=>{const m=s.meta||{};DOMAINS.forEach(D=>{const d=(s.domains||{})[D.key];(d&&d.items||[]).forEach(i=>rows.push([m.nom,m.code,m.province,m.ville,m.date,D.label,i.type,i.marque,i.modele,i.serie,i.qte,i.etat,i.lieu,i.annee,i.obs]))})});
+  return"﻿"+rows.map(r=>r.map(q).join(";")).join("\r\n")}
+function standalone(body,title){
+  const css=`:root{--ink:#10232E;--ink-2:#3E5561;--ink-3:#6B808B;--surface:#fff;--surface-2:#F4F7F8;--line:#D5DEE2;--brand:#0E4A5C;--good:#1F7A4D;--good-soft:#DDF1E6;--warn:#B26A00;--warn-soft:#FBEBD0;--bad:#B3261E;--bad-soft:#F8DEDC;--off:#5B5B66;--off-soft:#E6E6EA;--display:Arial,Helvetica,sans-serif;--body:Arial,Helvetica,sans-serif}
+body{font:14px/1.5 Arial,Helvetica,sans-serif;color:var(--ink);max-width:900px;margin:24px auto;padding:0 20px}h2,h3{margin:0}.mono{font-family:Consolas,monospace}.muted{color:var(--ink-3)}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:bold}
+.rep,.card{display:flex;flex-direction:column;gap:18px;margin-bottom:28px}.rep h2{font-size:24px}.rep h3{font-size:16px;padding-bottom:6px;border-bottom:2px solid var(--brand);color:var(--brand)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kpi{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--surface-2)}.kpi b{display:block;font-size:22px}.kpi span{font-size:12px;color:var(--ink-3)}
+.stack{display:flex;height:14px;border-radius:7px;overflow:hidden;border:1px solid var(--line);-webkit-print-color-adjust:exact;print-color-adjust:exact}.stack i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px}.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c);vertical-align:-1px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}th,td{padding:6px 8px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:var(--surface-2)}
+.kv{display:grid;grid-template-columns:40% 1fr;font-size:13px;border:1px solid var(--line)}.kv div{padding:6px 10px;border-bottom:1px solid var(--line)}.kv div:nth-child(odd){background:var(--surface-2);color:var(--ink-2)}
+.alert{border-left:4px solid var(--bad);background:var(--bad-soft);padding:8px 12px;font-size:13px}.pill{font-size:11px;font-weight:bold;padding:3px 7px;border-radius:99px;white-space:nowrap}
+.p-Bon{background:var(--good-soft);color:var(--good)}.p-Passable{background:var(--warn-soft);color:var(--warn)}.p-Mauvais{background:var(--bad-soft);color:var(--bad)}.p-Hors{background:var(--off-soft);color:var(--off)}
+a{color:inherit;text-decoration:none}@media print{body{margin:0}.rep h3{break-after:avoid}}`;
+  return`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${css}</style></head><body>${body}</body></html>`}
+async function save(filename,data){
+  const ext=filename.split(".").pop();const type={html:"text/html",csv:"text/csv",json:"application/json"}[ext]||"application/octet-stream";
+  const blob=new Blob([data],{type:type+";charset=utf-8"});
+  try{const file=new File([blob],filename,{type});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:filename});return}}catch(e){if(e&&e.name==="AbortError")return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);toast("Fichier prêt : "+filename)}
+/* ---------------- Navigation ---------------- */
+document.getElementById("navSites").onclick=()=>go("sites",view.site);
+document.getElementById("navSite").onclick=()=>{if(view.site&&getSite(view.site))go("site",view.site)};
+document.getElementById("navReport").onclick=()=>go("report",view.site);
+document.getElementById("backBtn").onclick=()=>{if(view.name==="domain")go("site",view.site);else if(view.name==="report"&&view.site)go("site",view.site);else go("sites",view.site)};
+window.addEventListener("online",flushSoon);
+
+lsLoad();render();connect();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
