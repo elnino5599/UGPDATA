@@ -1,7 +1,7 @@
 {
-  "name": "InfraDouane",
-  "short_name": "InfraDouane",
-  "description": "Collecte de terrain UGP-MOD : inventaire technique des bureaux de douane",
+  "name": "DATA-UGP",
+  "short_name": "DATA-UGP",
+  "description": "UGP-MOD : collecte technique et inventaire des bureaux de douane",
   "lang": "fr",
   "start_url": "./index.html",
   "scope": "./",
